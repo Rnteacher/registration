@@ -58,6 +58,22 @@ export default function CheckinPage() {
         return;
       }
 
+      // Check if student already checked in today
+      const today = new Date().toISOString().slice(0, 10);
+      const existingCheckin = await supabase
+        .from("attendance_logs")
+        .select("id")
+        .eq("student_id", student.id)
+        .gte("timestamp", today + "T00:00:00")
+        .lte(today + "T23:59:59")
+        .single();
+
+      if (existingCheckin) {
+        setStudentName(student.full_name);
+        setStatus("already");
+        return;
+      }
+
       const payload: Database["public"]["Tables"]["attendance_logs"]["Insert"] = {
         student_id: student.id,
         method: "QR",
