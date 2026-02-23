@@ -30,6 +30,7 @@ export default function CheckinPage() {
   const [studentName, setStudentName] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [search, setSearch] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const deviceId = useMemo(() => {
     if (typeof window === "undefined") return null;
@@ -167,6 +168,8 @@ export default function CheckinPage() {
     } catch {
       setErrorMsg("שגיאה כללית");
       setStatus("error");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -224,10 +227,11 @@ export default function CheckinPage() {
                   key={student.id}
                   className={
                     "w-full px-4 py-3 text-right hover:bg-slate-50 " +
-                    (student.device_id ? "opacity-50 cursor-not-allowed" : "")
+                    (student.device_id ? "opacity-50 cursor-not-allowed" : "") +
+                    (isLoading ? "opacity-50 cursor-not-allowed" : "")
                   }
                   onClick={() => handleChoose(student)}
-                  disabled={!!student.device_id}
+                  disabled={!!student.device_id || isLoading}
                 >
                   <div className="font-medium">{student.full_name}</div>
                   <div className="text-slate-500 text-sm">{student.group_name}</div>
