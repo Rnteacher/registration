@@ -109,8 +109,23 @@ export default function CheckinPage() {
         return;
       }
 
-      setStudentName(student.full_name);
-      setStatus("success");
+      // Verify the check-in was successful
+      const todayVerify = new Date().toISOString().slice(0, 10);
+      const existingCheckinVerify = await (supabase as any)
+        .from("attendance_logs")
+        .select("id")
+        .eq("student_id", student.id)
+        .gte("timestamp", todayVerify + "T00:00:00")
+        .lte(todayVerify + "T23:59:59")
+        .single();
+
+      if (existingCheckinVerify) {
+        setStudentName(student.full_name);
+        setStatus("success");
+      } else {
+        setErrorMsg("שגיאה ברישום נוכחות");
+        setStatus("error");
+      }
     } catch {
       setStatus("no_location");
     }
