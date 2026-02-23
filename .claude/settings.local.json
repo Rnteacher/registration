@@ -3,7 +3,13 @@
     "allow": [
       "Bash(npm run build:*)",
       "Bash(npx vercel:*)",
-      "Bash(NEXT_PUBLIC_SUPABASE_URL=\"\" NEXT_PUBLIC_SUPABASE_ANON_KEY=\"\" npm run build:*)"
+      "Bash(NEXT_PUBLIC_SUPABASE_URL=\"\" NEXT_PUBLIC_SUPABASE_ANON_KEY=\"\" npm run build:*)",
+      "Bash(pip install:*)",
+      "Bash(pip3 install:*)",
+      "Bash(python -m pip install:*)",
+      "Bash(where:*)",
+      "Bash(C:/Users/ronen/miniconda3/python.exe -m pip install:*)",
+      "Bash(C:/Users/ronen/miniconda3/python.exe:*)"
     ]
   }
 }
