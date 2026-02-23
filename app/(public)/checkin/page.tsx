@@ -60,12 +60,12 @@ export default function CheckinPage() {
 
       // Check if student already checked in today
       const today = new Date().toISOString().slice(0, 10);
-      const existingCheckin = await supabase
+      const existingCheckin = await (supabase as any)
         .from("attendance_logs")
         .select("id")
         .eq("student_id", student.id)
         .gte("timestamp", today + "T00:00:00")
-        .lte(today + "T23:59:59")
+        .lte("timestamp", today + "T23:59:59")
         .single();
 
       if (existingCheckin) {
