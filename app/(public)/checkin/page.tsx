@@ -59,17 +59,17 @@ export default function CheckinPage() {
         return;
       }
 
-      // Check if student already checked in today
-      const today = new Date().toISOString().slice(0, 10);
-      const existingCheckin = await (supabase as any)
+      // Check if student already checked in today (pre-check)
+      const todayPre = new Date().toISOString().slice(0, 10);
+      const existingCheckinPre = await (supabase as any)
         .from("attendance_logs")
         .select("id")
         .eq("student_id", student.id)
-        .gte("timestamp", today + "T00:00:00")
-        .lte("timestamp", today + "T23:59:59")
+        .gte("timestamp", todayPre + "T00:00:00")
+        .lte(todayPre + "T23:59:59")
         .single();
 
-      if (existingCheckin) {
+      if (existingCheckinPre) {
         setStudentName(student.full_name);
         setStatus("already");
         return;
@@ -88,11 +88,22 @@ export default function CheckinPage() {
         .insert(payload);
 
       if (error) {
-        if ((error as { code?: string }).code === "23505") {
+        // Double-check after insert (just in case)
+        const todayPost = new Date().toISOString().slice(0, 10);
+        const existingCheckinPost = await (supabase as any)
+          .from("attendance_logs")
+          .select("id")
+          .eq("student_id", student.id)
+          .gte("timestamp", todayPost + "T00:00:00")
+          .lte(todayPost + "T23:59:59")
+          .single();
+
+        if (existingCheckinPost) {
           setStudentName(student.full_name);
           setStatus("already");
           return;
         }
+        
         setErrorMsg("שגיאה ברישום נוכחות");
         setStatus("error");
         return;
