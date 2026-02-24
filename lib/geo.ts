@@ -1,5 +1,5 @@
-export const SCHOOL_LAT = 32.10470939597011;
-export const SCHOOL_LNG = 34.872576003835746;
+export const SCHOOL_LAT = 32.1317569532238;
+export const SCHOOL_LNG = 34.89816774417768;
 
 export function distanceInMeters(
   lat1: number,
