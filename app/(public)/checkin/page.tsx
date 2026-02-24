@@ -49,14 +49,14 @@ export default function CheckinPage() {
       );
     });
 
-  const attemptCheckin = async (student: Student) => {
+  const attemptCheckin = async (student: Student): Promise<Status> => {
     try {
       const { lat, lng } = await getLocation();
       const dist = distanceInMeters(lat, lng, SCHOOL_LAT, SCHOOL_LNG);
 
       if (dist > MAX_DISTANCE_METERS) {
         setStatus("too_far");
-        return;
+        return "too_far";
       }
 
       const today = new Date().toISOString().slice(0, 10);
@@ -71,7 +71,7 @@ export default function CheckinPage() {
       if (existingCheckin) {
         setStudentName(student.full_name);
         setStatus("already");
-        return;
+        return "already";
       }
 
       const payload: Database["public"]["Tables"]["attendance_logs"]["Insert"] = {
@@ -90,18 +90,20 @@ export default function CheckinPage() {
         if ((error as { code?: string }).code === "23505") {
           setStudentName(student.full_name);
           setStatus("already");
-          return;
+          return "already";
         }
 
         setErrorMsg("שגיאה ברישום נוכחות");
         setStatus("error");
-        return;
+        return "error";
       }
 
       setStudentName(student.full_name);
       setStatus("success");
+      return "success";
     } catch {
       setStatus("no_location");
+      return "no_location";
     }
   };
 
@@ -149,6 +151,11 @@ export default function CheckinPage() {
 
     setIsLoading(true);
     try {
+      const checkinStatus = await attemptCheckin(student);
+      if (checkinStatus !== "success" && checkinStatus !== "already") {
+        return;
+      }
+
       const id =
         window.crypto?.randomUUID?.() ??
         Date.now().toString() + "-" + Math.random().toString(16).slice(2);
@@ -165,7 +172,6 @@ export default function CheckinPage() {
       }
 
       localStorage.setItem(DEVICE_KEY, id);
-      await attemptCheckin(student);
     } catch {
       setErrorMsg("שגיאה כללית");
       setStatus("error");
