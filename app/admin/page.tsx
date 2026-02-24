@@ -60,6 +60,35 @@ export default function AdminPage() {
     await supabase.auth.signOut();
   };
 
+  const handleDownloadCsv = () => {
+    const header = ["שם חניך", "תאריך נוכחות"];
+    const escapeCsv = (value: string) => `"${value.replace(/"/g, '""')}"`;
+
+    const lines = rows.map((row) => {
+      const name = row.students?.full_name ?? "";
+      const attendanceDate = new Date(row.timestamp).toLocaleString("he-IL", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
+      return [escapeCsv(name), escapeCsv(attendanceDate)].join(",");
+    });
+
+    const csv = [header.join(","), ...lines].join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `attendance_logs_${today}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   if (!session) {
     return (
       <main className="min-h-screen flex items-center justify-center p-6">
@@ -89,9 +118,14 @@ export default function AdminPage() {
     <main className="p-6 space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">דוח נוכחות יומי</h1>
-        <Button variant="outline" onClick={handleLogout}>
-          התנתק
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={handleDownloadCsv}>
+            הורד CSV
+          </Button>
+          <Button variant="outline" onClick={handleLogout}>
+            התנתק
+          </Button>
+        </div>
       </div>
 
       {loading && <p>טוען נתונים...</p>}
